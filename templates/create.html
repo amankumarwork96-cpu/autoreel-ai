@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Create Reel — AutoReel AI{% endblock %}
+
+{% block extra_styles %}
+<style>
+.create-container {
+    max-width: 600px;
+    margin: 3rem auto;
+}
+
+.create-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.create-header h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.4rem; }
+.create-header p  { color: #a0a0b8; }
+
+.topic-input {
+    width: 100%;
+    padding: 1rem 1.2rem;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    color: #e8e8f0;
+    font-size: 1.05rem;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: none;
+}
+
+.topic-input:focus { border-color: #8b5cf6; }
+
+.char-count {
+    text-align: right;
+    font-size: 0.8rem;
+    color: #a0a0b8;
+    margin-top: 0.4rem;
+}
+
+.btn-block { width: 100%; text-align: center; padding: 0.9rem; font-size: 1rem; }
+
+.examples {
+    margin-top: 2rem;
+}
+
+.examples h3 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #a0a0b8;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.75rem;
+}
+
+.example-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.chip {
+    background: rgba(139,92,246,0.1);
+    border: 1px solid rgba(139,92,246,0.25);
+    color: #a0a0b8;
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.chip:hover {
+    background: rgba(139,92,246,0.2);
+    color: #e8e8f0;
+}
+
+.pipeline-info {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin-top: 2rem;
+    padding: 1rem;
+    background: rgba(255,255,255,0.02);
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+
+.pipeline-info-step {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #a0a0b8;
+}
+
+.pipeline-info-step .icon { font-size: 1.3rem; display: block; margin-bottom: 0.3rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-container">
+    <div class="create-header">
+        <h1>Create a New Reel</h1>
+        <p>Type a topic and our AI pipeline does the rest</p>
+    </div>
+
+    <div class="card">
+        <form method="POST" action="{{ url_for('reels.create') }}">
+            <div class="form-group">
+                <label>Your Topic</label>
+                <textarea
+                    class="topic-input"
+                    name="topic"
+                    id="topicInput"
+                    rows="3"
+                    maxlength="200"
+                    placeholder="e.g. 5 morning habits that will change your life"
+                    required
+                ></textarea>
+                <div class="char-count"><span id="charCount">0</span>/200</div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">
+                ⚡ Generate Reel
+            </button>
+        </form>
+    </div>
+
+    <!-- Example topics -->
+    <div class="examples">
+        <h3>Try one of these</h3>
+        <div class="example-chips">
+            <span class="chip" onclick="setTopic(this)">5 habits of highly successful people</span>
+            <span class="chip" onclick="setTopic(this)">How to stay consistent with your goals</span>
+            <span class="chip" onclick="setTopic(this)">3 tips to improve your focus while studying</span>
+            <span class="chip" onclick="setTopic(this)">Why most people never reach their potential</span>
+            <span class="chip" onclick="setTopic(this)">Morning routine for peak productivity</span>
+            <span class="chip" onclick="setTopic(this)">How to build confidence from scratch</span>
+        </div>
+    </div>
+
+    <!-- What happens next -->
+    <div class="pipeline-info">
+        <div class="pipeline-info-step">
+            <span class="icon">🧠</span> AI writes script
+        </div>
+        <div class="pipeline-info-step">
+            <span class="icon">🖼️</span> Generates images
+        </div>
+        <div class="pipeline-info-step">
+            <span class="icon">🎙️</span> Records voiceover
+        </div>
+        <div class="pipeline-info-step">
+            <span class="icon">🎬</span> Renders reel
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const input = document.getElementById('topicInput');
+    const counter = document.getElementById('charCount');
+
+    // Update character count as user types
+    input.addEventListener('input', () => {
+        counter.textContent = input.value.length;
+    });
+
+    // Fill in topic from example chips
+    function setTopic(el) {
+        input.value = el.textContent;
+        counter.textContent = el.textContent.length;
+        input.focus();
+    }
+</script>
+{% endblock %}

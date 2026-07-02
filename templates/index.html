@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}AutoReel AI — Turn Any Topic Into a Viral Reel{% endblock %}
+
+{% block extra_styles %}
+<style>
+.hero {
+    text-align: center;
+    padding: 5rem 1rem 3rem;
+}
+
+.hero-badge {
+    display: inline-block;
+    background: rgba(139, 92, 246, 0.15);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    color: #8b5cf6;
+    padding: 0.3rem 0.9rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+}
+
+.hero h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 1.2rem;
+}
+
+.hero h1 span {
+    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero p {
+    font-size: 1.1rem;
+    color: #a0a0b8;
+    max-width: 520px;
+    margin: 0 auto 2rem;
+    line-height: 1.7;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.pipeline {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 3rem 0;
+    padding: 1.5rem;
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+
+.pipeline-step {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #a0a0b8;
+}
+
+.pipeline-arrow { color: rgba(139, 92, 246, 0.4); }
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.feature-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: border-color 0.2s;
+}
+
+.feature-card:hover { border-color: rgba(139, 92, 246, 0.3); }
+.feature-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
+.feature-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+.feature-card p { font-size: 0.85rem; color: #a0a0b8; line-height: 1.6; }
+
+.section-label {
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #8b5cf6;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.75rem;
+}
+
+.section-title { text-align: center; font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; }
+.section-sub { text-align: center; color: #a0a0b8; margin-bottom: 2rem; font-size: 0.95rem; }
+
+.cta-section {
+    text-align: center;
+    padding: 3rem 1rem;
+    margin-top: 2rem;
+    background: rgba(139, 92, 246, 0.06);
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    border-radius: 16px;
+}
+
+.cta-section h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.75rem; }
+.cta-section p  { color: #a0a0b8; margin-bottom: 1.5rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-badge">✨ Powered by Groq + ElevenLabs + Pollinations</div>
+    <h1>Turn Any Topic Into a<br><span>Viral AI Reel</span></h1>
+    <p>Type a topic. Get a fully produced vertical video reel in minutes — AI script, AI images, AI voiceover, auto-rendered.</p>
+    <div class="hero-buttons">
+        <a href="{{ url_for('auth.signup') }}" class="btn btn-primary">Start for Free →</a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline">Log In</a>
+    </div>
+</section>
+
+<div class="pipeline">
+    <div class="pipeline-step"><span>💬</span> Your Topic</div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-step"><span>🧠</span> AI Script</div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-step"><span>🖼️</span> AI Images</div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-step"><span>🎙️</span> AI Voiceover</div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-step"><span>🎬</span> Your Reel</div>
+</div>
+
+<div class="section-label">What you get</div>
+<div class="section-title">Everything handled by AI</div>
+<p class="section-sub">No editing skills. No design tools. Just a topic.</p>
+
+<div class="features">
+    <div class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <h3>AI Script Writing</h3>
+        <p>Groq's Llama 3.1 writes a punchy 6-scene script tailored to your topic in seconds.</p>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">🖼️</div>
+        <h3>AI Image Generation</h3>
+        <p>Pollinations generates one cinematic image per scene — portrait format, reel-ready.</p>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">🎙️</div>
+        <h3>AI Voiceover</h3>
+        <p>ElevenLabs converts your script to a natural-sounding voiceover MP3 automatically.</p>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">🎬</div>
+        <h3>Auto Video Render</h3>
+        <p>FFmpeg stitches everything into a 1080×1920 MP4 ready for Instagram or TikTok.</p>
+    </div>
+</div>
+
+<div class="cta-section mt-4">
+    <h2>Ready to make your first reel?</h2>
+    <p>Takes less than 2 minutes. No credit card required.</p>
+    <a href="{{ url_for('auth.signup') }}" class="btn btn-primary">Create Free Account →</a>
+</div>
+{% endblock %}

@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}Generating Reel — AutoReel AI{% endblock %}
+
+{% block extra_styles %}
+<style>
+.status-container {
+    max-width: 560px;
+    margin: 4rem auto;
+    text-align: center;
+}
+
+.status-container h1 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 0.4rem;
+}
+
+.topic-display {
+    color: #8b5cf6;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* Spinner */
+.spinner {
+    width: 56px;
+    height: 56px;
+    border: 3px solid rgba(139,92,246,0.2);
+    border-top-color: #8b5cf6;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    margin: 0 auto 1.5rem;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.status-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.status-sub {
+    font-size: 0.85rem;
+    color: #a0a0b8;
+    margin-bottom: 2rem;
+}
+
+/* Progress steps */
+.steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    text-align: left;
+    margin-bottom: 2rem;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    color: #a0a0b8;
+    transition: all 0.3s;
+}
+
+.step.active {
+    background: rgba(139,92,246,0.1);
+    border-color: rgba(139,92,246,0.3);
+    color: #e8e8f0;
+}
+
+.step.done {
+    background: rgba(16,185,129,0.08);
+    border-color: rgba(16,185,129,0.2);
+    color: #10b981;
+}
+
+.step.failed {
+    background: rgba(239,68,68,0.08);
+    border-color: rgba(239,68,68,0.2);
+    color: #ef4444;
+}
+
+.step-icon { font-size: 1.1rem; width: 24px; text-align: center; }
+
+/* Done state */
+.done-state { display: none; }
+.done-state .checkmark { font-size: 4rem; margin-bottom: 1rem; }
+.done-state h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+.done-state p  { color: #a0a0b8; margin-bottom: 1.5rem; }
+
+/* Failed state */
+.failed-state { display: none; }
+.failed-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+.failed-state h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem; }
+.failed-state p  { color: #a0a0b8; margin-bottom: 1.5rem; font-size: 0.9rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="status-container">
+
+    <!-- Processing state (shown by default) -->
+    <div id="processingState">
+        <h1>Creating your reel...</h1>
+        <div class="topic-display">"{{ project.topic }}"</div>
+
+        <div class="spinner"></div>
+        <div class="status-text" id="statusText">Starting up...</div>
+        <div class="status-sub" id="statusSub">This takes about 1-2 minutes</div>
+
+        <div class="steps">
+            <div class="step" id="step-script">
+                <span class="step-icon">🧠</span> Writing AI script
+            </div>
+            <div class="step" id="step-images">
+                <span class="step-icon">🖼️</span> Generating images
+            </div>
+            <div class="step" id="step-audio">
+                <span class="step-icon">🎙️</span> Recording voiceover
+            </div>
+            <div class="step" id="step-video">
+                <span class="step-icon">🎬</span> Rendering final video
+            </div>
+        </div>
+    </div>
+
+    <!-- Done state (shown when complete) -->
+    <div class="done-state" id="doneState">
+        <div class="checkmark">🎉</div>
+        <h2>Your reel is ready!</h2>
+        <p>The AI pipeline finished generating your reel successfully.</p>
+        <a href="{{ url_for('reels.gallery') }}" class="btn btn-primary">Watch Your Reel →</a>
+    </div>
+
+    <!-- Failed state -->
+    <div class="failed-state" id="failedState">
+        <div class="icon">❌</div>
+        <h2>Something went wrong</h2>
+        <p id="errorMsg">An error occurred during generation.</p>
+        <a href="{{ url_for('reels.create') }}" class="btn btn-outline">Try Again</a>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const PROJECT_ID = "{{ project.id }}";
+    const STATUS_URL = "/status/" + PROJECT_ID + "/json";
+
+    // Map status values to human-readable text
+    const STATUS_LABELS = {
+        "queued":             { text: "Waiting to start...",       sub: "Your job is queued" },
+        "generating_script":  { text: "Writing your script...",    sub: "Groq AI is crafting your scenes" },
+        "generating_images":  { text: "Generating images...",      sub: "Pollinations is creating visuals (takes ~1 min)" },
+        "generating_audio":   { text: "Recording voiceover...",    sub: "ElevenLabs is synthesizing your narration" },
+        "rendering_video":    { text: "Rendering final video...",  sub: "FFmpeg is stitching everything together" },
+        "done":               { text: "Done!",                     sub: "" },
+        "failed":             { text: "Failed",                    sub: "" },
+    };
+
+    // Which steps are "done" for each status
+    const STEPS_DONE = {
+        "queued":             [],
+        "generating_script":  [],
+        "generating_images":  ["step-script"],
+        "generating_audio":   ["step-script", "step-images"],
+        "rendering_video":    ["step-script", "step-images", "step-audio"],
+        "done":               ["step-script", "step-images", "step-audio", "step-video"],
+    };
+
+    const ACTIVE_STEP = {
+        "generating_script":  "step-script",
+        "generating_images":  "step-images",
+        "generating_audio":   "step-audio",
+        "rendering_video":    "step-video",
+    };
+
+    function updateUI(status, errorMsg) {
+        const label = STATUS_LABELS[status] || { text: status, sub: "" };
+
+        // Update text
+        document.getElementById("statusText").textContent = label.text;
+        document.getElementById("statusSub").textContent  = label.sub;
+
+        // Update step highlights
+        const allSteps = ["step-script", "step-images", "step-audio", "step-video"];
+        const done = STEPS_DONE[status] || [];
+        const active = ACTIVE_STEP[status];
+
+        allSteps.forEach(stepId => {
+            const el = document.getElementById(stepId);
+            el.className = "step";
+            if (done.includes(stepId)) el.classList.add("done");
+            else if (stepId === active) el.classList.add("active");
+        });
+
+        // Switch to done/failed states
+        if (status === "done") {
+            document.getElementById("processingState").style.display = "none";
+            document.getElementById("doneState").style.display = "block";
+        }
+
+        if (status === "failed") {
+            document.getElementById("processingState").style.display = "none";
+            document.getElementById("failedState").style.display = "block";
+            if (errorMsg) {
+                document.getElementById("errorMsg").textContent = errorMsg;
+            }
+        }
+    }
+
+    // Poll the status endpoint every 3 seconds
+    function poll() {
+        fetch(STATUS_URL)
+            .then(res => res.json())
+            .then(data => {
+                updateUI(data.status, data.error_msg);
+
+                // Stop polling when finished
+                if (data.status !== "done" && data.status !== "failed") {
+                    setTimeout(poll, 3000);
+                }
+            })
+            .catch(err => {
+                console.error("Poll error:", err);
+                setTimeout(poll, 5000);  // retry after 5s on network error
+            });
+    }
+
+    // Start polling immediately
+    poll();
+</script>
+{% endblock %}
